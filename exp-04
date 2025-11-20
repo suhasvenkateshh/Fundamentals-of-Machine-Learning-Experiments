@@ -1,0 +1,40 @@
+import numpy as np
+
+# Input and output
+input_value = np.array([[0, 0], [0, 1], [1, 1], [1, 0]])
+output = np.array([0, 0, 1, 0]).reshape(4, 1)
+
+# Initial weights and bias
+weights = np.array([[0.1], [0.3]])
+bias = 0.2
+
+# Activation and derivative functions
+def sigmoid_func(x):
+    return 1 / (1 + np.exp(-x))
+
+def der(x):
+    return sigmoid_func(x) * (1 - sigmoid_func(x))
+
+# Training loop
+for epochs in range(15000):
+    input_arr = input_value
+    weighted_sum = np.dot(input_arr, weights) + bias
+    first_output = sigmoid_func(weighted_sum)
+    error = first_output - output
+    total_error = np.square(error).mean()
+    first_der = error
+    second_der = der(weighted_sum)
+    derivative = first_der * second_der
+    t_input = input_value.T
+    final_derivative = np.dot(t_input, derivative)
+    weights = weights - (0.05 * final_derivative)
+    bias = bias - (0.05 * np.sum(derivative))
+
+# Final weights and bias
+print("Final weights:\n", weights)
+print("Final bias:\n", bias)
+
+# Prediction
+pred_input = input_value
+pred_output = sigmoid_func(np.dot(pred_input, weights) + bias)
+print("Predicted output:\n", pred_output)
