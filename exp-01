@@ -1,0 +1,70 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load built-in Iris dataset from seaborn
+df = sns.load_dataset("iris")
+
+# Rename columns to match your original code
+df.rename(columns={
+    'sepal_length': 'SepalLengthCm',
+    'sepal_width': 'SepalWidthCm',
+    'petal_length': 'PetalLengthCm',
+    'petal_width': 'PetalWidthCm',
+    'species': 'Species'
+}, inplace=True)
+
+# Display first 150 rows
+print(df.head(150))
+
+# Shape of the DataFrame
+print("Shape of the DataFrame:", df.shape)
+
+# Split by species
+df_Setosa = df[df['Species'] == 'setosa']
+df_Versicolor = df[df['Species'] == 'versicolor']
+df_Virginica = df[df['Species'] == 'virginica']
+
+# -------------------------------
+# Univariate Analysis
+# -------------------------------
+
+def univariate_plot(feature):
+    plt.figure(figsize=(8, 2))
+    plt.scatter(df_Setosa[feature], np.zeros_like(df_Setosa[feature]), label='Setosa')
+    plt.scatter(df_Versicolor[feature], np.zeros_like(df_Versicolor[feature]), label='Versicolor')
+    plt.scatter(df_Virginica[feature], np.zeros_like(df_Virginica[feature]), label='Virginica')
+    plt.xlabel(feature)
+    plt.legend()
+    plt.title(f'Univariate: {feature}')
+    plt.show()
+
+univariate_plot('SepalWidthCm')
+univariate_plot('SepalLengthCm')
+univariate_plot('PetalWidthCm')
+univariate_plot('PetalLengthCm')
+
+# -------------------------------
+# Bivariate Analysis
+# -------------------------------
+
+sns.FacetGrid(df, hue='Species', height=5) \
+    .map(plt.scatter, "SepalWidthCm", "PetalWidthCm") \
+    .add_legend()
+plt.title('Bivariate: Sepal Width vs Petal Width')
+plt.show()
+
+sns.FacetGrid(df, hue='Species', height=5) \
+    .map(plt.scatter, "SepalLengthCm", "PetalLengthCm") \
+    .add_legend()
+plt.title('Bivariate: Sepal Length vs Petal Length')
+plt.show()
+
+# -------------------------------
+# Multivariate Analysis
+# -------------------------------
+
+sns.pairplot(df, hue="Species", height=2)
+plt.suptitle('Multivariate Analysis: All Features', y=1.02)
+plt.show()
