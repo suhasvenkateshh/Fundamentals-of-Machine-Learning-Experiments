@@ -1,0 +1,71 @@
+mport numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# --- Step 1: Create Synthetic Data ---
+# Instead of loading a file, we'll generate our own data.
+# This ensures the code always runs without errors.
+# We'll create data that has a clear linear relationship with some random noise.
+np.random.seed(0) # Use a seed for reproducibility
+X = 2 * np.random.rand(100, 1) # Generate 100 random numbers for X
+# The true relationship is y = 4 + 3x + noise
+y = 4 + 3 * X + np.random.randn(100, 1)
+
+print("--- Data Generation ---")
+print("Generated sample data to work with.")
+print("-" * 30)
+
+
+# --- Step 2: Calculate Line of Best Fit using Least Squares Method ---
+# This is the manual calculation based on the formulas.
+mean_x = np.mean(X)
+mean_y = np.mean(y)
+
+# Get the number of data points
+n = len(X)
+
+# Using the formula to calculate slope (m) and intercept (c)
+numerator = 0
+denominator = 0
+for i in range(n):
+    numerator += (X[i] - mean_x) * (y[i] - mean_y)
+    denominator += (X[i] - mean_x) ** 2
+
+m = numerator / denominator
+c = mean_y - (m * mean_x)
+
+print("--- Manual Least Squares Calculation ---")
+print(f"Calculated Slope (m): {m[0]:.4f}")
+print(f"Calculated Intercept (c): {c[0]:.4f}")
+print("-" * 30)
+
+
+# --- Step 3: Make Predictions and Plot the Graph ---
+# Generate predictions using our calculated slope and intercept
+y_predicted = m * X + c
+
+# Plotting the original data points and the regression line
+plt.figure(figsize=(10, 6))
+
+# Scatter plot of the original data
+plt.scatter(X, y, color='blue', label='Original Data Points', alpha=0.7)
+
+# Plot of the regression line
+plt.plot(X, y_predicted, color='red', linewidth=2, label='Line of Best Fit')
+
+plt.xlabel('X Value (Independent Variable)')
+plt.ylabel('Y Value (Dependent Variable)')
+plt.title('Linear Regression using Least Squares Method')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+# --- (Optional) Step 4: Verification with Scikit-Learn ---
+# This part confirms our manual calculation is correct by comparing it to the library.
+print("--- Verification with Scikit-Learn Library ---")
+model = LinearRegression()
+model.fit(X, y)
+print(f"Scikit-Learn Slope (m): {model.coef_[0][0]:.4f}")
+print(f"Scikit-Learn Intercept (c): {model.intercept_[0]:.4f}")
+print("Note: The results should be nearly identical to the manual calculation."
