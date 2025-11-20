@@ -1,0 +1,44 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning)
+
+# Simulate the Banknote Authentication dataset
+data = {
+    'Image.Var': [1.493976, 3.616560, 4.266860, 3.425600, 0.392240, 4.364900, 3.691280, 0.222260, 3.032240, 1.535060],
+    'Image.Skew': [1.622682, 9.668861, -4.652582, 8.522611, -4.455828, 9.778188, 3.012099, -6.810460, 5.588764, 9.177182],
+    'Image.Curt': [1.456820, 4.012820, -1.482594, 2.387504, 0.571888, 3.960360, 0.728180, -2.248600, 1.616400, 2.497180],
+    'Entropy': [1.442609, 0.449499, -1.016291, -0.944640, 0.968481, -1.361250, -0.586810, 0.703365, -0.562510, -0.770215],
+    'Class': [1, 0, 0, 0, 1, 0, 1, 1, 0, 0]
+}
+
+bnotes = pd.DataFrame(data)
+
+# Split features and target
+x = bnotes.drop('Class', axis=1)
+y = bnotes['Class']
+
+# Function to train and evaluate model
+def train_and_evaluate(x_train, x_test, y_train, y_test, activation):
+    print(f"\n--- Activation Function: {activation} ---")
+    mlp = MLPClassifier(max_iter=500, activation=activation, random_state=42)
+    mlp.fit(x_train, y_train)
+    pred = mlp.predict(x_test)
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test, pred))
+    print("Classification Report:")
+    print(classification_report(y_test, pred))
+    print("Accuracy:", accuracy_score(y_test, pred))
+
+# First split: 80/20
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, stratify=y, random_state=42)
+for activation in ['relu', 'logistic', 'tanh', 'identity']:
+    train_and_evaluate(x_train, x_test, y_train, y_test, activation)
+
+# Second split: 70/30
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, stratify=y, random_state=42)
+for activation in ['relu', 'logistic', 'tanh', 'identity']:
+    train_and_evaluate(x_train, x_test, y_train, y_test, activation)
