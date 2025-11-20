@@ -1,0 +1,88 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import svm
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+
+# 🎨 Seaborn style
+sns.set(font_scale=1.2)
+
+# 🍰 Sample dataset: Sugar and Flour content for Muffins and Cupcakes
+data = {
+    'Sugar': [10, 15, 12, 18, 20, 22, 25, 30, 28, 26,
+              11, 16, 13, 19, 21, 23, 27, 29, 24, 31],
+    'Flour': [20, 22, 19, 25, 28, 30, 35, 40, 38, 36,
+              21, 23, 20, 26, 29, 31, 34, 39, 33, 41],
+    'Type': ['Muffin']*10 + ['Cupcake']*10
+}
+recipes = pd.DataFrame(data)
+
+# 🎯 Prepare data
+X = recipes[['Sugar', 'Flour']].values
+y = np.where(recipes['Type'] == 'Muffin', 0, 1)
+
+# 🧠 Train SVM model
+model = svm.SVC(kernel='linear')
+model.fit(X, y)
+
+# 📐 Decision boundary
+w = model.coef_[0]
+a = -w[0] / w[1]
+xx = np.linspace(X[:, 0].min() - 2, X[:, 0].max() + 2)
+yy = a * xx - (model.intercept_[0] / w[1])
+
+# ➖ Margins
+support_vectors = model.support_vectors_
+b_down = support_vectors[0]
+yy_down = a * xx + (b_down[1] - a * b_down[0])
+b_up = support_vectors[-1]
+yy_up = a * xx + (b_up[1] - a * b_up[0])
+
+# 📊 Plot 1: Seaborn scatter + decision boundary
+sns.lmplot(x='Sugar', y='Flour', data=recipes, hue='Type',
+           palette='Set1', fit_reg=False, scatter_kws={"s": 70})
+plt.plot(xx, yy, 'k-', linewidth=2, label='Decision Boundary')
+plt.title("Muffins vs Cupcakes with SVM Separation")
+plt.xlabel("Sugar")
+plt.ylabel("Flour")
+plt.legend()
+plt.show()
+
+# 🖼️ Plot 2: Decision boundary with margins and support vectors
+sns.lmplot(x='Sugar', y='Flour', data=recipes, hue='Type',
+           palette='Set1', fit_reg=False, scatter_kws={"s": 70})
+plt.plot(xx, yy, 'k-', linewidth=2, label='Decision Boundary')
+plt.plot(xx, yy_down, 'k--', label='Margin')
+plt.plot(xx, yy_up, 'k--')
+plt.scatter(support_vectors[:, 0], support_vectors[:, 1],
+            s=80, facecolors='none', edgecolors='k', label='Support Vectors')
+plt.title("SVM Decision Boundary with Margins")
+plt.xlabel("Sugar")
+plt.ylabel("Flour")
+plt.legend()
+plt.show()
+
+# 🧪 Train/test split and evaluation
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+model_eval = svm.SVC(kernel='linear')
+model_eval.fit(X_train, y_train)
+y_pred = model_eval.predict(X_test)
+
+# 📈 Evaluation metrics
+print("Predictions:", y_pred)
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+# 🎯 Plot 3: Test set predictions
+test_df = pd.DataFrame(X_test, columns=['Sugar', 'Flour'])
+test_df['Predicted'] = np.where(y_pred == 0, 'Muffin', 'Cupcake')
+
+sns.lmplot(x='Sugar', y='Flour', data=test_df, hue='Predicted',
+           palette='Set1', fit_reg=False, scatter_kws={"s": 100})
+plt.title("Test Set Predictions")
+plt.xlabel("Sugar")
+plt.ylabel("Flour")
+plt.show()
